@@ -1,0 +1,215 @@
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DASHBOARD_DIR="${SCRIPT_DIR}/dashboard"
+
+print_status() {
+    echo -e "\033[1;34m[INFO]\033[0m $1"
+}
+
+print_success() {
+    echo -e "\033[1;32m[SUCCESS]\033[0m $1"
+}
+
+print_error() {
+    echo -e "\033[1;31m[ERROR]\033[0m $1"
+}
+
+print_warning() {
+    echo -e "\033[1;33m[WARNING]\033[0m $1"
+}
+
+show_help() {
+    echo "SP5G (Special Project 5G) Script Manager"
+    echo ""
+    echo "Usage: $0 [COMMAND]"
+    echo ""
+    echo "Installation Commands:"
+    echo "  install-part1        Install Part 1 (Docker setup) - requires reboot"
+    echo "  install-part2        Install Part 2 (UHD and OAI build) - run after reboot"
+    echo ""
+    echo "System Commands:"
+    echo "  dashboard            Start web-based management dashboard"
+    echo "  help                 Show this help"
+    echo ""
+    echo "Examples:"
+    echo "  ./sp5g install-part1"
+    echo "  ./sp5g install-part2"
+    echo "  ./sp5g dashboard"
+}
+
+install_part1() {
+    print_status "Starting SP5G installation Part 1 (Docker setup)..."
+    
+    print_status "Installing dependencies..."
+    sudo apt update -y
+    sudo apt install -y git net-tools putty python3-pip python3.12-venv
+    sudo apt install -y autoconf automake build-essential ccache cmake cpufrequtils doxygen ethtool g++ git inetutils-tools libboost-all-dev libncurses-dev libusb-1.0-0 libusb-1.0-0-dev libusb-dev python3-dev python3-mako python3-numpy python3-requests python3-scipy python3-setuptools python3-ruamel.yaml
+    
+    print_status "Installing Docker..."
+    sudo apt install -y ca-certificates curl
+    sudo install -m 0755 -d /etc/apt/keyrings
+    sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+    sudo chmod a+r /etc/apt/keyrings/docker.asc
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+    sudo apt update -y
+    sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+    sudo apt install -y docker-compose
+    sudo usermod -a -G docker $(whoami)
+    
+    print_success "SP5G installation Part 1 completed!"
+    print_warning "Please reboot to apply Docker permissions, then run: ./sp5g install-part2"
+    
+    read -p "Reboot now to apply Docker permissions? (y/n): " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        print_status "Rebooting in 5 seconds..."
+        sleep 5
+        sudo reboot
+    else
+        print_warning "Please reboot manually later: sudo reboot"
+        print_warning "After reboot, run: ./sp5g install-part2"
+    fi
+}
+
+install_part2() {
+    print_status "Starting SP5G installation Part 2 (CN5G, Docker images, UHD and OAI build)..."
+    
+    print_status "Downloading CN5G..."
+    cd ~
+    wget -O oai-cn5g.zip https://gitlab.eurecom.fr/oai/openairinterface5g/-/archive/develop/openairinterface5g-develop.zip?path=doc/tutorial_resources/oai-cn5g
+    unzip -q oai-cn5g.zip
+    mv openairinterface5g-develop-doc-tutorial_resources-oai-cn5g/doc/tutorial_resources/oai-cn5g oai-cn5g
+    rm -r openairinterface5g-develop-doc-tutorial_resources-oai-cn5g oai-cn5g.zip
+    cd oai-cn5g
+    docker compose pull -q
+    
+    print_status "Installing UHD..."
+    git clone https://github.com/EttusResearch/uhd.git ~/uhd
+    cd ~/uhd
+    git checkout v4.8.0.0
+    cd host
+    mkdir -p build && cd build
+    cmake ../ -DCMAKE_BUILD_TYPE=Release
+    make -j $(nproc)
+    make test
+    sudo make install
+    sudo ldconfig
+    sudo uhd_images_downloader
+    
+    print_status "Building SP5G (using current directory as OAI source)..."
+    cd ~/sp5g/cmake_targets
+    ./build_oai -I
+    sudo apt install -y libforms-dev libforms-bin
+    ./build_oai -w USRP --ninja --nrUE --gNB --build-lib "nrscope" -C
+    
+    print_status "Downloading additional Docker images..."
+    cd ~
+    docker login
+    docker pull mysql:8.0
+    docker pull oaisoftwarealliance/oai-amf:v2.1.10
+    docker pull oaisoftwarealliance/oai-smf:v2.1.10
+    docker pull oaisoftwarealliance/oai-upf:v2.1.10
+    docker pull oaisoftwarealliance/trf-gen-cn5g:focal
+    docker pull oaisoftwarealliance/oai-gnb:develop
+    docker pull oaisoftwarealliance/oai-nr-ue:develop
+    docker logout
+    
+    print_status "Installing SP5G Dashboard dependencies..."
+    if [ ! -d "$DASHBOARD_DIR/venv" ]; then
+        python3 -m venv "$DASHBOARD_DIR/venv"
+    fi
+    
+    cd "$DASHBOARD_DIR"
+    source venv/bin/activate
+    pip install -r requirements.txt
+    
+    print_success "SP5G installation Part 2 completed!"
+    print_success "Full SP5G installation completed! You can now run: ./sp5g dashboard"
+}
+
+start_dashboard() {
+    print_status "Starting SP5G Management Dashboard..."
+    
+    if [ ! -d "$DASHBOARD_DIR" ]; then
+        print_error "Dashboard directory not found: $DASHBOARD_DIR"
+        exit 1
+    fi
+    
+    if [ ! -f "$DASHBOARD_DIR/dashboard.py" ]; then
+        print_error "Dashboard application not found: $DASHBOARD_DIR/dashboard.py"
+        exit 1
+    fi
+    
+    if [ ! -d "$DASHBOARD_DIR/venv" ]; then
+        print_status "Installing dashboard dependencies..."
+        python3 -m venv "$DASHBOARD_DIR/venv"
+        cd "$DASHBOARD_DIR"
+        source venv/bin/activate
+        pip install -r requirements.txt
+    fi
+    
+    LOG_FILE="$DASHBOARD_DIR/dashboard.log"
+    
+    print_success "Launching web-based management dashboard..."
+    print_status "Dashboard will be available at: http://localhost:5000"
+    
+    print_status "Opening browser automatically..."
+    if command -v xdg-open &> /dev/null; then
+        xdg-open http://localhost:5000 &
+    elif command -v open &> /dev/null; then
+        open http://localhost:5000 &
+    elif command -v start &> /dev/null; then
+        start http://localhost:5000 &
+    else
+        print_warning "Could not automatically open browser. Please open http://localhost:5000 manually."
+    fi
+    
+    cd "$DASHBOARD_DIR"
+    source venv/bin/activate
+    
+    echo "" > "$LOG_FILE"
+    
+    python dashboard.py &
+    DASHBOARD_PID=$!
+    
+    print_status "Dashboard started (PID: $DASHBOARD_PID)"
+    print_status "Monitoring command output... (Press Ctrl+C to stop)"
+    echo ""
+    
+    tail -f "$LOG_FILE" &
+    TAIL_PID=$!
+    
+    trap "kill $DASHBOARD_PID $TAIL_PID 2>/dev/null; exit 0" INT TERM
+    
+    wait $DASHBOARD_PID
+}
+
+main() {
+    if [ $# -eq 0 ]; then
+        show_help
+        exit 1
+    fi
+    
+    case "$1" in
+        install-part1)
+            install_part1
+            ;;
+        install-part2)
+            install_part2
+            ;;
+        dashboard)
+            start_dashboard
+            ;;
+        help)
+            show_help
+            ;;
+        *)
+            print_error "Unknown command: $1"
+            show_help
+            exit 1
+            ;;
+    esac
+}
+
+main "$@"
