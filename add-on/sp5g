@@ -1,7 +1,8 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DASHBOARD_DIR="${SCRIPT_DIR}/dashboard"
+ADD_ON_ROOT="${SCRIPT_DIR}"
+DASHBOARD_DIR="${ADD_ON_ROOT}/units/dashboard"
 
 print_status() {
     echo -e "\033[1;34m[INFO]\033[0m $1"

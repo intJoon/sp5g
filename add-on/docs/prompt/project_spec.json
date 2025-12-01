@@ -1,0 +1,290 @@
+{
+  "project": {
+    "title": "DDoS Learning and Designing Platform for Open RAN-based 5G Systems",
+    "original_title": "5G base station attack and defence between CU and DU",
+    "version": "1.0",
+    "priority": "high",
+    "type": "graduation_project",
+    "institution": "NTUST CSIE"
+  },
+  "competition_info": {
+    "grading": {
+      "exhibition": 50,
+      "advisor": 50,
+      "note": "exhibition scored by external judges"
+    },
+    "poster": {
+      "size": "A1",
+      "quantity": 1,
+      "required_content": [
+        "title",
+        "student_ids",
+        "student_names",
+        "advisor_name"
+      ],
+      "note": "self-print and bring to venue"
+    },
+    "venue": {
+      "table_size": "100cm x 75cm x 50cm",
+      "equipment": ["table", "power_outlet"]
+    },
+    "presentation": {
+      "total_time": 5,
+      "student_presentation": 3,
+      "qna": 2,
+      "note": "divided into 2 groups due to large number of participants"
+    }
+  },
+  "project_description": {
+    "base": "Open source OAI 5G environment",
+    "focus": "F1 interface between CU and DU",
+    "purpose": "DDoS attack, detection, and defense implementation/research platform",
+    "target_audience": "security learners",
+    "advisor_guidance": "use popular tools at undergraduate implementable level"
+  },
+  "protocols": {
+    "O-CU-CP": ["RRC", "PDCP"],
+    "O-CU-UP": ["SDAP", "PDCP"],
+    "O-DU": [
+      "RLC",
+      "MAC",
+      "PHY-high (Scrambling Modulation, Layer mapping, Precoding, RE mapping)"
+    ]
+  },
+  "attack_methods": {
+    "F1-C_Control": [
+      "Massive UE connection",
+      "UE context manage, RRC/PDCP signaling exchange",
+      "Hand over, Tracking Area Update",
+      "PDU Session, Bearer Flooding"
+    ],
+    "F1-U_Data": [
+      "UDP Flood"
+    ],
+    "enhancement_options": {
+      "F1AP_Vulnerability": {
+        "Information_sniffing": {
+          "purpose": "get IP/access permission/... to ease attack condition"
+        },
+        "Fuzzing": {
+          "purpose": "try any input, causing crash, find zero-day"
+        }
+      },
+      "Fast_flux": true,
+      "Distributed_DDoS": {
+        "description": "Upgrade to DDoS, e.g. botnet",
+        "note": "다지역 다노드로 분산식 도스 공격 시뮬레이션"
+      },
+      "Auto_mode": true
+    }
+  },
+  "detection_methods": {
+    "Get_index": {
+      "description": "탐지되는 기준치"
+    },
+    "Graph_layout": {
+      "location": "in GUI"
+    },
+    "Detect_attack": {
+      "techniques": ["허니팟 기법"]
+    },
+    "Auto_mode": true
+  },
+  "defense_methods": [
+    "Filtering",
+    "Rate Limiting / Throttling (dynamic)",
+    "Dynamic allocation of DU by CU (disconnect/reboot)",
+    "Self protection (RAN changes ip and reboot)",
+    "Encryption/Authentication/Integrity",
+    "Auto mode"
+  ],
+  "tools": {
+    "search_sources": [
+      "https://sectools.org"
+    ],
+    "github_repositories": [
+      "https://github.com/asset-group/5ghoul-5g-nr-attacks",
+      "https://github.com/asset-group/Sni5Gect-5GNR-sniffing-and-exploitation",
+      "https://github.com/NewEraCracker/LOIC/",
+      "https://github.com/DynamicDesignz/HOIC",
+      "https://github.com/gkbrk/slowloris",
+      "https://sourceforge.net/projects/r-u-dead-yet/",
+      "https://github.com/Karlheinzniebuhr/torshammer"
+    ],
+    "tools_list": [
+      "trinoo",
+      "TFN",
+      "TFN2K",
+      "Stacheldraht",
+      "tcpdump",
+      "Scapy",
+      "hping3",
+      "iperf3"
+    ],
+    "note": "choose most popular tools, if insufficient, search GitHub directly"
+  },
+  "references": {
+    "O-RAN_specifications": {
+      "security_group": "https://specifications.o-ran.org/specifications?QueryOptions=%7B%22SearchString%22%3Anull%2C%22DocumentTypeIds%22%3Anull%2C%22Version%22%3Anull%2C%22WorkGroupId%22%3A24%2C%22ReleaseId%22%3Anull%2C%22FeaturePackageId%22%3Anull%2C%22FileType%22%3Anull%2C%22ShowLatest%22%3Atrue%2C%22IsVisible%22%3Afalse%2C%22PublicationDateRange%22%3A%7B%22StartDate%22%3Anull%2C%22EndDate%22%3Anull%7D%7D",
+      "F1_interface_group": "https://specifications.o-ran.org/specifications?QueryOptions=%7B%22SearchString%22%3Anull%2C%22DocumentTypeIds%22%3Anull%2C%22Version%22%3Anull%2C%22WorkGroupId%22%3A11%2C%22ReleaseId%22%3Anull%2C%22FeaturePackageId%22%3Anull%2C%22FileType%22%3Anull%2C%22ShowLatest%22%3Atrue%2C%22IsVisible%22%3Afalse%2C%22PublicationDateRange%22%3A%7B%22StartDate%22%3Anull%2C%22EndDate%22%3Anull%7D%7D"
+    },
+    "OAI_documents": {
+      "doc_folder": "https://gitlab.eurecom.fr/oai/openairinterface5g/-/tree/develop/doc",
+      "UE_design": "https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/doc/nr-ue-design.md",
+      "multi_UE": "https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/doc/NR_SA_Tutorial_OAI_multi_UE.md",
+      "F1_design": "https://gitlab.eurecom.fr/oai/openairinterface5g/-/tree/develop/doc/F1AP",
+      "RRC_design": "https://gitlab.eurecom.fr/oai/openairinterface5g/-/tree/develop/doc/RRC",
+      "E1_split_design": "https://gitlab.eurecom.fr/oai/openairinterface5g/-/tree/develop/ci-scripts/yaml_files/5g_rfsimulator_e1"
+    },
+    "note": "must check all reference links"
+  },
+  "terminology": {
+    "network_units": [
+      "기본 oai 네트워크 (CN, CUCP, CUUP, DU, UE)",
+      "공격자 (감염자 포함)",
+      "탐지자",
+      "방어자"
+    ],
+    "action_units": [
+      "공격자 (감염자 포함)",
+      "탐지자",
+      "방어자"
+    ]
+  },
+  "file_structure": {
+    "SP5G": {
+      "add-on": {
+        "docs": {
+          "NTUST": [
+            "paper.tex",
+            "poster.json",
+            "demo_script.md",
+            "example.mp4",
+            "demo.mp4"
+          ],
+          "maintainance": [
+            "copied_file.txt",
+            "new_idea.txt",
+            "file_info.txt",
+            "tested_feature.txt",
+            "referred_docs.txt"
+          ]
+        },
+        "units": {
+          "actioner": [
+            "attacker",
+            "defender",
+            "detector"
+          ],
+          "dashboard": [],
+          "networker": {
+            "system5g": [
+              "5g_rfsimulator_custom_v2.1.10",
+              "ue_traffic"
+            ]
+          },
+          "statistician": []
+        },
+        "files": [
+          ".gitignore",
+          "README.md",
+          "sp5g"
+        ]
+      }
+    }
+  },
+  "project_rules": {
+    "sandbox_rule": {
+      "description": "modify only within add-on folder",
+      "exception": "if modification needed outside, copy file to add-on folder and modify there",
+      "record": "copied_file.txt"
+    },
+    "open_mind_rule": {
+      "description": "apply new ideas freely",
+      "record": "new_idea.txt"
+    },
+    "always_document_rule": {
+      "description": "document every new file",
+      "record": "file_info.txt",
+      "content": [
+        "file purpose",
+        "relationships with other files",
+        "all function purposes"
+      ]
+    },
+    "always_test_rule": {
+      "description": "test every new feature",
+      "record": "tested_feature.txt"
+    },
+    "always_learn_rule": {
+      "description": "when stuck, search latest papers and learn techniques",
+      "record": "referred_docs.txt"
+    }
+  },
+  "deliverables": {
+    "code": true,
+    "paper": {
+      "description": "detailed view",
+      "max_explanation": true
+    },
+    "poster": {
+      "description": "general view of paper",
+      "components": [
+        "methodology chart",
+        "time graph",
+        "accuracy table",
+        "conclusion"
+      ],
+      "note": "paper = detailed view of Poster; poster = general view of paper"
+    },
+    "demo_video": {
+      "source": "조작 녹화본",
+      "requirements": [
+        "1 proper example of attack & defence",
+        "easy vocabulary easy understand"
+      ]
+    },
+    "professor_document": {
+      "project_record": {
+        "timeline": {
+          "plan": "전체 타임라인 계획서",
+          "execution": "이행 기록",
+          "role_assignment": "프로젝트 역할 분담, 맡은 기능 표와 그림으로 만들기"
+        },
+        "study_content": {
+          "network_slicing": {
+            "concepts": [
+              "대역폭 속도 중점",
+              "초저지연 중점",
+              "다량 중점"
+            ]
+          },
+          "references": "참고문헌 정리"
+        }
+      }
+    }
+  },
+  "research_differentiation": {
+    "learner_ease": [
+      "open source inheritance (forked project)",
+      "convenient web-based operation",
+      "show code feature in action tab"
+    ],
+    "realism": [
+      "scenario presets for intuitive severity depiction",
+      "diverse attack/detection/defense techniques for realistic multi-faceted experiments",
+      "model design considering integration ease with other projects",
+      "easy deployment (git pull installation)"
+    ],
+    "note": "find example research/papers for unique features via arxiv"
+  },
+  "future_development": {
+    "AN_presentation": "AN 피피티 싹 긁어오기",
+    "attack_upgrade": [
+      "Consider Optional Security",
+      "Consider Static/Dynamic/Dependency analysis"
+    ],
+    "defense_challenge": "방어 기법이 무거워지면 RIC의 개념이랑 중복되는 게 아닌지"
+  }
+}
+

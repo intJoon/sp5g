@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - SP5G Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-left">
+                <h1><i class="fas fa-shield-alt"></i> SP5G Dashboard</h1>
+                <p class="subtitle">About SP5G & O-RAN</p>
+            </div>
+            <div class="header-right">
+                <a href="/dashboard" class="btn btn-primary">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="card">
+                <h2><i class="fas fa-info-circle"></i> What is SP5G?</h2>
+                <p>
+                    SP5G (Special Project 5G) is a comprehensive research platform for studying DDoS attacks and defenses 
+                    in 5G Open RAN networks, specifically targeting the F1 interface between Centralized Unit (CU) and 
+                    Distributed Unit (DU).
+                </p>
+                <p>
+                    This platform is designed for security learners, especially beginners, to understand and experiment 
+                    with DDoS attacks and defense mechanisms in a safe, controlled environment.
+                </p>
+            </div>
+
+            <div class="card">
+                <h2><i class="fas fa-network-wired"></i> What is O-RAN?</h2>
+                <p>
+                    <strong>O-RAN (Open Radio Access Network)</strong> is an initiative to create open, interoperable, 
+                    and intelligent RAN architectures. Unlike traditional RAN where all components are proprietary, 
+                    O-RAN allows operators to mix and match components from different vendors.
+                </p>
+                
+                <h3>Key Components:</h3>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>CU-CP (Centralized Unit - Control Plane)</strong>: Handles RRC and PDCP control signaling</li>
+                    <li><strong>CU-UP (Centralized Unit - User Plane)</strong>: Handles SDAP and PDCP data forwarding</li>
+                    <li><strong>DU (Distributed Unit)</strong>: Handles RLC, MAC, and PHY-high processing</li>
+                    <li><strong>RU (Radio Unit)</strong>: Handles PHY-low and RF processing</li>
+                </ul>
+
+                <h3>F1 Interface:</h3>
+                <p>
+                    The <strong>F1 interface</strong> connects CU and DU components:
+                </p>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>F1-C (Control Plane)</strong>: SCTP-based, port 38472, handles control signaling</li>
+                    <li><strong>F1-U (User Plane)</strong>: GTP-U over UDP, port 2152, handles user data</li>
+                </ul>
+                <p>
+                    <strong>Why F1 is critical:</strong> One CU controls multiple DUs. Attacking the F1 interface can 
+                    cause widespread service disruption, making it a high-value target for attackers.
+                </p>
+            </div>
+
+            <div class="card">
+                <h2><i class="fas fa-bullseye"></i> Project Goals</h2>
+                <div class="grid-2">
+                    <div class="stat-card">
+                        <div class="stat-value"><i class="fas fa-graduation-cap"></i></div>
+                        <div class="stat-label">Educational Value</div>
+                        <p>Lower the barrier for security learners to study DDoS attacks and defenses</p>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value"><i class="fas fa-flask"></i></div>
+                        <div class="stat-label">Research Value</div>
+                        <p>Demonstrate security vulnerabilities in F1 interface and develop defense mechanisms</p>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value"><i class="fas fa-code"></i></div>
+                        <div class="stat-label">Practical Value</div>
+                        <p>Provide working code that learners can study, modify, and extend</p>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value"><i class="fas fa-shield-alt"></i></div>
+                        <div class="stat-label">Security Value</div>
+                        <p>Help operators understand and defend against F1 interface attacks</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2><i class="fas fa-cogs"></i> Key Features</h2>
+                <div class="metrics-grid">
+                    <div class="metric-box">
+                        <div class="metric-value">9</div>
+                        <div class="metric-label">Attack Types</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value">3</div>
+                        <div class="metric-label">Detection Layers</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value">6</div>
+                        <div class="metric-label">Defense Mechanisms</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value">5</div>
+                        <div class="metric-label">Scenarios</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value">97%</div>
+                        <div class="metric-label">Detection Accuracy</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value">4.8s</div>
+                        <div class="metric-label">Recovery Time</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2><i class="fas fa-book"></i> How to Use</h2>
+                <ol style="line-height: 2;">
+                    <li><strong>Start the Dashboard</strong>: Run <code>./sp5g dashboard</code> or <code>python3 dashboard.py</code></li>
+                    <li><strong>Start 5G System</strong>: Click "Start System" in the Overview tab</li>
+                    <li><strong>Select Scenario</strong>: Choose a scenario from the Scenarios tab</li>
+                    <li><strong>Launch Attack</strong>: Configure and launch an attack from the Attack tab</li>
+                    <li><strong>Enable Defense</strong>: Activate defense mechanisms from the Defense tab</li>
+                    <li><strong>Monitor Performance</strong>: View real-time metrics in the Performance tab</li>
+                </ol>
+            </div>
+
+            <div class="card">
+                <h2><i class="fas fa-exclamation-triangle"></i> Important Notice</h2>
+                <div class="alert alert-warning">
+                    <strong>Educational and Research Use Only</strong>
+                    <p>
+                        This platform is designed for educational and research purposes only. 
+                        Do NOT use for malicious purposes or on production networks without authorization.
+                    </p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2><i class="fas fa-link"></i> Resources</h2>
+                <ul style="line-height: 2;">
+                    <li><strong>GitHub</strong>: <a href="https://github.com/intJoon/sp5g" target="_blank">https://github.com/intJoon/sp5g</a></li>
+                    <li><strong>O-RAN Alliance</strong>: <a href="https://www.o-ran.org" target="_blank">https://www.o-ran.org</a></li>
+                    <li><strong>OpenAirInterface</strong>: <a href="https://openairinterface.org" target="_blank">https://openairinterface.org</a></li>
+                    <li><strong>Documentation</strong>: See <code>docs/</code> folder for detailed guides</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h2><i class="fas fa-users"></i> Team</h2>
+                <p>
+                    <strong>SP5G (Special Project 5G)</strong><br>
+                    Department of Computer Science and Information Engineering<br>
+                    National Taiwan University of Science and Technology (NTUST)
+                </p>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
+

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SP5G - 5G DDoS Attack & Defense Platform</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .landing-hero {
+            text-align: center;
+            padding: 80px 20px;
+            background: linear-gradient(135deg, var(--primary-color), var(--success-color));
+            color: white;
+            border-radius: 10px;
+            margin-bottom: 40px;
+        }
+        .landing-hero h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: white;
+        }
+        .landing-hero p {
+            font-size: 20px;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        .landing-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+        .feature-card {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        .feature-card:hover {
+            transform: translateY(-10px);
+        }
+        .feature-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+        .cta-button {
+            display: inline-block;
+            padding: 15px 40px;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            margin: 20px 10px;
+            transition: all 0.3s;
+        }
+        .cta-button:hover {
+            background: var(--success-color);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        }
+        .stats-section {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 10px;
+            margin: 40px 0;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            text-align: center;
+        }
+        .stat-item h3 {
+            font-size: 36px;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        .stat-item p {
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="landing-hero">
+            <h1><i class="fas fa-shield-alt"></i> SP5G</h1>
+            <p>DDoS Learning and Designing Platform for Open RAN-based 5G Systems</p>
+            <p style="font-size: 16px; opacity: 0.8;">
+                Comprehensive attack and defense system targeting the F1 interface in OpenAirInterface (OAI) 5G environments
+            </p>
+            <div>
+                <a href="/" class="cta-button">
+                    <i class="fas fa-rocket"></i> Get Started
+                </a>
+                <a href="/about" class="cta-button" style="background: rgba(255, 255, 255, 0.2); border: 2px solid white;">
+                    <i class="fas fa-info-circle"></i> Learn More
+                </a>
+            </div>
+        </div>
+
+        <div class="stats-section">
+            <h2 style="text-align: center; margin-bottom: 30px;">Platform Statistics</h2>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <h3>9</h3>
+                    <p>Attack Types</p>
+                </div>
+                <div class="stat-item">
+                    <h3>3</h3>
+                    <p>Detection Layers</p>
+                </div>
+                <div class="stat-item">
+                    <h3>6</h3>
+                    <p>Defense Mechanisms</p>
+                </div>
+                <div class="stat-item">
+                    <h3>5</h3>
+                    <p>Scenarios</p>
+                </div>
+                <div class="stat-item">
+                    <h3>97%</h3>
+                    <p>Detection Accuracy</p>
+                </div>
+                <div class="stat-item">
+                    <h3>4.8s</h3>
+                    <p>Recovery Time</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="landing-features">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-bomb"></i></div>
+                <h3>Attack Module</h3>
+                <p>
+                    9 different attack types including F1-C control plane attacks, 
+                    F1-U user plane attacks, and distributed DDoS simulation
+                </p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-search"></i></div>
+                <h3>Detection System</h3>
+                <p>
+                    3-Layer detection system combining threshold-based, statistical, 
+                    and machine learning approaches for 97% accuracy
+                </p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
+                <h3>Defense Mechanisms</h3>
+                <p>
+                    6 defense mechanisms including IP filtering, rate limiting, 
+                    dynamic throttling, and automated recovery
+                </p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-tv"></i></div>
+                <h3>Web Dashboard</h3>
+                <p>
+                    Real-time monitoring and control interface with intuitive 
+                    web-based UI for easy experimentation
+                </p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-film"></i></div>
+                <h3>Scenarios</h3>
+                <p>
+                    5 realistic scenarios including nuclear facility, smart city, 
+                    military operations, and more
+                </p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-chart-bar"></i></div>
+                <h3>Analytics</h3>
+                <p>
+                    Comprehensive performance analytics with graphs, statistics, 
+                    and export capabilities
+                </p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2><i class="fas fa-graduation-cap"></i> Perfect for Security Learners</h2>
+            <div class="grid-2">
+                <div>
+                    <h3>Why SP5G?</h3>
+                    <ul style="line-height: 2;">
+                        <li>✅ Open source code - Study and modify</li>
+                        <li>✅ Web-based interface - No complex commands</li>
+                        <li>✅ Real scenarios - Understand real-world impact</li>
+                        <li>✅ Comprehensive documentation - Learn step by step</li>
+                        <li>✅ Extensible design - Add your own code</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3>Who Can Use?</h3>
+                    <ul style="line-height: 2;">
+                        <li>🎓 Security students and researchers</li>
+                        <li>🏢 Telecom operators (testing/validation)</li>
+                        <li>🔬 Academic institutions</li>
+                        <li>🛡️ Security professionals</li>
+                        <li>💻 Anyone interested in 5G security</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" style="text-align: center;">
+            <h2>Ready to Get Started?</h2>
+            <p style="font-size: 18px; margin: 20px 0;">
+                Start exploring DDoS attacks and defenses in 5G Open RAN networks
+            </p>
+            <a href="/dashboard" class="cta-button">
+                <i class="fas fa-arrow-right"></i> Launch Dashboard
+            </a>
+        </div>
+    </div>
+</body>
+</html>
+

@@ -1,52 +1,39 @@
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
+
+# Virtual Environment
 venv/
-ENV/
 env/
-dashboard/venv/
+ENV/
+.venv
+
+# Logs
 *.log
 logs/
-data/
-results/
-*.pyc
-.DS_Store
+dashboard.log
+
+# IDE
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
-.pytest_cache/
-.coverage
-htmlcov/
-dist/
-build/
-*.egg-info/
-monitoring/
-network/
-performance/
-scenarios/
 
-node_modules/
-.cache/
-.npm/
-.env
-.env.local
-*.pid
-*.seed
-*.local
+# OS
+.DS_Store
+Thumbs.db
 
-*.bak
+# Project specific
+data/
+results/
 *.tmp
-*.temp
-.ipynb_checkpoints/
-.mypy_cache/
-.ruff_cache/
-.tox/
+*.bak
 
-.git/
-*.orig
-*.rej
-
+# Build artifacts
+build/
+dist/
+*.egg-info/
