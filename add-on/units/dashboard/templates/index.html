@@ -5,354 +5,661 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SP5G - 5G DDoS Attack & Defense Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer">
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
-    <a href="#main-content" class="skip-link">Skip to main content</a>
-    <div class="loading-overlay" id="loading-overlay">
+    <div class="loading-overlay" id="loading-overlay" style="display: none;">
         <div class="loading-spinner"></div>
-        <p style="margin-top: 20px; color: var(--text-secondary);">Loading SP5G Dashboard...</p>
+        <p>Loading SP5G Dashboard...</p>
     </div>
-    <div class="container" id="main-content">
-        <header class="header">
-            <div class="header-left">
-                <h1><i class="fas fa-shield-alt"></i> SP5G Dashboard</h1>
-                <p class="subtitle">5G DDoS Attack & Defense System</p>
+
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-shield-alt"></i>
+                    <div>
+                        <h1>SP5G</h1>
+                        <p class="subtitle">5G DDoS Platform</p>
+                    </div>
+                </div>
             </div>
-            <div class="header-right">
-                <a href="/about" class="btn btn-secondary" style="margin-right: 10px; text-decoration: none;">
-                    <i class="fas fa-info-circle"></i> About
+
+            <nav class="sidebar-nav">
+                <a href="#overview" class="nav-item active" data-tab="overview">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
                 </a>
-                <div class="status-indicator" id="connection-status">
+                <a href="#attack" class="nav-item" data-tab="attack">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="width: 20px; height: 20px;">
+                        <path d="M12 1l-2 3h4l-2-3z"/>
+                        <rect x="11" y="4" width="2" height="14"/>
+                        <path d="M8 18h8M10 18v4h4v-4"/>
+                        <rect x="11" y="21" width="2" height="1"/>
+                    </svg>
+                    <span>Attack</span>
+                </a>
+                <a href="#detection" class="nav-item" data-tab="detection">
+                    <i class="fas fa-search"></i>
+                    <span>Detection</span>
+                </a>
+                <a href="#defense" class="nav-item" data-tab="defense">
+                    <i class="fas fa-shield"></i>
+                    <span>Defense</span>
+                </a>
+                <a href="#scenarios" class="nav-item" data-tab="scenarios">
+                    <i class="fas fa-film"></i>
+                    <span>Scenarios</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="connection-status" id="connection-status">
                     <i class="fas fa-circle"></i>
                     <span>Disconnected</span>
                 </div>
                 <div class="timestamp" id="current-time"></div>
+                <a href="/about" class="nav-item">
+                    <i class="fas fa-info-circle"></i>
+                    <span>About</span>
+                </a>
+                <button class="nav-item theme-toggle" id="theme-toggle" title="Toggle theme" style="width: 100%; border: none; background: none; cursor: pointer; text-align: left;">
+                    <i class="fas fa-moon" id="theme-icon"></i>
+                    <span>Theme</span>
+                </button>
             </div>
-        </header>
-
-        <nav class="nav-tabs">
-            <button class="tab-btn active" data-tab="overview"><i class="fas fa-tachometer-alt"></i> Overview</button>
-            <button class="tab-btn" data-tab="topology"><i class="fas fa-project-diagram"></i> Topology</button>
-            <button class="tab-btn" data-tab="attack"><i class="fas fa-skull-crossbones"></i> Attack</button>
-            <button class="tab-btn" data-tab="defense"><i class="fas fa-shield"></i> Defense</button>
-            <button class="tab-btn" data-tab="scenarios"><i class="fas fa-film"></i> Scenarios</button>
-            <button class="tab-btn" data-tab="performance"><i class="fas fa-chart-line"></i> Performance</button>
-            <a href="/about" class="tab-btn"><i class="fas fa-info-circle"></i> About</a>
-        </nav>
+        </aside>
 
         <main class="main-content">
-            <div id="overview-tab" class="tab-content active">
-                <div class="grid-2">
-                    <div class="card">
-                        <h2><i class="fas fa-server"></i> System Status</h2>
-                        <div class="status-grid">
-                            <div class="status-item">
-                                <span class="status-label">CN5G Core:</span>
-                                <span class="status-value" id="cn5g-status">Unknown</span>
-                            </div>
-                            <div class="status-item">
-                                <span class="status-label">gNB:</span>
-                                <span class="status-value" id="gnb-status">Unknown</span>
-                            </div>
-                            <div class="status-item">
-                                <span class="status-label">UE:</span>
-                                <span class="status-value" id="ue-status">Unknown</span>
-                            </div>
-                            <div class="status-item">
-                                <span class="status-label">Namespaces:</span>
-                                <span class="status-value" id="ns-status">0</span>
+            <header class="top-bar">
+                <div class="top-bar-left">
+                    <h2 id="page-title">Overview</h2>
+                    <p id="page-description">System status and real-time metrics</p>
+                </div>
+                <div class="top-bar-right">
+                    <div class="quick-actions">
+                        <button class="icon-btn" onclick="systemAction('start')" title="Start System">
+                            <i class="fas fa-play"></i>
+                        </button>
+                        <button class="icon-btn" onclick="systemAction('restart')" title="Restart System">
+                            <i class="fas fa-redo"></i>
+                        </button>
+                        <button class="icon-btn danger" onclick="systemAction('stop')" title="Stop System">
+                            <i class="fas fa-stop"></i>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content-area">
+                <div id="notification-banner" class="notification-banner" style="display: none;"></div>
+
+                <div id="overview-tab" class="tab-content active">
+                    <div class="content-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-bell"></i> Notifications</h3>
+                            <div class="button-group">
+                                <div class="notification-filters">
+                                    <button class="filter-btn active" data-filter="all" onclick="filterNotifications('all')">All</button>
+                                    <button class="filter-btn" data-filter="critical" onclick="filterNotifications('critical')">
+                                        <i class="fas fa-exclamation-circle"></i> Critical
+                                    </button>
+                                    <button class="filter-btn" data-filter="error" onclick="filterNotifications('error')">
+                                        <i class="fas fa-times-circle"></i> Error
+                                    </button>
+                                    <button class="filter-btn" data-filter="warning" onclick="filterNotifications('warning')">
+                                        <i class="fas fa-exclamation-triangle"></i> Warning
+                                    </button>
+                                    <button class="filter-btn" data-filter="info" onclick="filterNotifications('info')">
+                                        <i class="fas fa-info-circle"></i> Info
+                                    </button>
+                                </div>
+                                <button class="icon-btn" onclick="clearNotifications()" title="Clear All">
+                                    <i class="fas fa-times"></i>
+                                </button>
                             </div>
                         </div>
-                        <div class="button-group">
-                            <button class="btn btn-success" onclick="systemAction('start')">
-                                <i class="fas fa-play"></i> Start System
+                        <div class="card-body">
+                            <div id="notifications-container" class="notifications-container">
+                                <div class="no-data">No notifications</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="content-grid">
+                        <div class="content-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-server"></i> System Control</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="system-status-list">
+                                    <div class="status-row">
+                                        <span class="status-label">CN5G Core</span>
+                                        <span class="status-badge" id="cn5g-status">Unknown</span>
+                                    </div>
+                                    <div class="status-row">
+                                        <span class="status-label">gNB</span>
+                                        <span class="status-badge" id="gnb-status">Unknown</span>
+                                    </div>
+                                    <div class="status-row">
+                                        <span class="status-label">UE</span>
+                                        <span class="status-badge" id="ue-status">Unknown</span>
+                                    </div>
+                                    <div class="status-row">
+                                        <span class="status-label">Network Namespaces</span>
+                                        <span class="status-badge" id="ns-status">0</span>
+                                    </div>
+                                </div>
+                                <div class="action-buttons">
+                                    <button class="btn btn-primary" onclick="testConnectivity()">
+                                        <i class="fas fa-network-wired"></i> Test Connectivity
+                                    </button>
+                                </div>
+                                <div id="connectivity-results" class="connectivity-results" style="display: none;">
+                                    <div class="results-header" onclick="toggleConnectivityResults()">
+                                        <h4><i class="fas fa-chart-bar"></i> Connectivity Results</h4>
+                                        <i class="fas fa-chevron-down" id="connectivity-toggle-icon"></i>
+                                    </div>
+                                    <div id="connectivity-content">
+                                        <div id="connectivity-summary" class="status-box"></div>
+                                        <div id="connectivity-details" class="table-container"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="content-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-chart-area"></i> Performance Chart</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="performance-chart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="content-card full-width">
+                        <div class="card-header">
+                            <h3><i class="fas fa-project-diagram"></i> Network Topology</h3>
+                            <div class="button-group">
+                                <button class="btn btn-primary" onclick="setupNamespaces()">
+                                    <i class="fas fa-network-wired"></i> Setup Namespaces
+                                </button>
+                                <button class="btn btn-warning" onclick="cleanupNamespaces()">
+                                    <i class="fas fa-broom"></i> Cleanup
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="topology-container">
+                                <svg id="topology-svg" width="100%" height="1000" style="min-height: 1000px;">
+                                    <g id="topology-elements"></g>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="content-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-chart-line"></i> Performance Analysis</h3>
+                            <div class="button-group">
+                                <button class="btn btn-success" onclick="startMonitoring()">
+                                    <i class="fas fa-play"></i> Start
+                                </button>
+                                <button class="btn btn-danger" onclick="stopMonitoring()">
+                                    <i class="fas fa-stop"></i> Stop
+                                </button>
+                                <button class="btn btn-secondary" onclick="exportPerformance('csv')">
+                                    <i class="fas fa-download"></i> Export CSV
+                                </button>
+                                <button class="btn btn-secondary" onclick="exportPerformance('json')">
+                                    <i class="fas fa-download"></i> Export JSON
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="content-grid">
+                        <div class="content-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-network-wired"></i> Network Traffic</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="network-chart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="content-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-table"></i> Performance Metrics</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-container">
+                                <table id="metrics-table" class="metrics-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Timestamp</th>
+                                            <th>CPU %</th>
+                                            <th>Memory %</th>
+                                            <th>Connections</th>
+                                            <th>Packet Rate</th>
+                                            <th>F1-C</th>
+                                            <th>F1-U</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="metrics-table-body">
+                                        <tr><td colspan="7" class="no-data">No data available</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div id="attack-tab" class="tab-content">
+                    <div class="content-grid">
+                        <div class="content-card">
+                            <div class="card-header">
+                                <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="width: 18px; height: 18px; display: inline-block; vertical-align: middle; margin-right: 8px;">
+                                    <path d="M12 1l-2 3h4l-2-3z"/>
+                                    <rect x="11" y="4" width="2" height="14"/>
+                                    <path d="M8 18h8M10 18v4h4v-4"/>
+                                    <rect x="11" y="21" width="2" height="1"/>
+                                </svg> Attack Configuration</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-section">
+                                    <label class="form-label">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 6px;">
+                                            <path d="M12 1l-2 3h4l-2-3z"/>
+                                            <rect x="11" y="4" width="2" height="14"/>
+                                            <path d="M8 18h8M10 18v4h4v-4"/>
+                                            <rect x="11" y="21" width="2" height="1"/>
+                                        </svg> Attack Type (Multiple Selection)
+                                    </label>
+                                    <div class="checkbox-group">
+                                        <div class="checkbox-section">
+                                            <div class="checkbox-section-title">F1-C (Control Plane)</div>
+                                            <label class="checkbox-item">
+                                                <input type="checkbox" name="attack-type" value="massive_ue_connection" onchange="updateAttackParams()">
+                                                <span>Massive UE Connection</span>
+                                            </label>
+                                            <label class="checkbox-item">
+                                                <input type="checkbox" name="attack-type" value="ue_context_flooding" onchange="updateAttackParams()">
+                                                <span>UE Context Flooding</span>
+                                            </label>
+                                            <label class="checkbox-item">
+                                                <input type="checkbox" name="attack-type" value="handover_flooding" onchange="updateAttackParams()">
+                                                <span>Handover Flooding</span>
+                                            </label>
+                                            <label class="checkbox-item">
+                                                <input type="checkbox" name="attack-type" value="bearer_flooding" onchange="updateAttackParams()">
+                                                <span>Bearer Flooding</span>
+                                            </label>
+                                        </div>
+                                        <div class="checkbox-section">
+                                            <div class="checkbox-section-title">F1-U (Data Plane)</div>
+                                            <label class="checkbox-item">
+                                                <input type="checkbox" name="attack-type" value="udp_flood" onchange="updateAttackParams()">
+                                                <span>UDP Flood</span>
+                                            </label>
+                                            <label class="checkbox-item">
+                                                <input type="checkbox" name="attack-type" value="gtp_flood" onchange="updateAttackParams()">
+                                                <span>GTP-U Flood</span>
+                                            </label>
+                                        </div>
+                                        <div class="checkbox-section">
+                                            <div class="checkbox-section-title">Advanced</div>
+                                            <label class="checkbox-item">
+                                                <input type="checkbox" name="attack-type" value="distributed_ddos" onchange="updateAttackParams()">
+                                                <span>Distributed DDoS</span>
+                                            </label>
+                                            <label class="checkbox-item">
+                                                <input type="checkbox" name="attack-type" value="slowloris" onchange="updateAttackParams()">
+                                                <span>Slowloris</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-section">
+                                    <label class="form-label">
+                                        <i class="fas fa-bullseye"></i> Target
+                                    </label>
+                                    <select id="attack-target" class="form-control">
+                                        <option value="cu_cp">CU-CP (192.168.71.130)</option>
+                                        <option value="cu_up">CU-UP (192.168.71.131)</option>
+                                        <option value="du">DU (192.168.71.132)</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-section">
+                                    <label class="form-label">
+                                        <i class="fas fa-cog"></i> Mode
+                                    </label>
+                                    <select id="attack-mode" class="form-control" onchange="updateAttackParams()">
+                                        <option value="manual">Manual (Custom Parameters)</option>
+                                        <option value="auto">Auto (Preset Parameters)</option>
+                                    </select>
+                                </div>
+
+                                <div id="attack-params-wrapper">
+                                    <div class="params-navigation" id="attack-params-nav" style="display: none;">
+                                        <button class="icon-btn" onclick="navigateParams('attack', 'prev')" id="attack-params-prev" title="Previous">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </button>
+                                        <span id="attack-params-title" style="margin: 0 12px; font-size: 14px; color: var(--text-secondary); font-weight: 500;"></span>
+                                        <button class="icon-btn" onclick="navigateParams('attack', 'next')" id="attack-params-next" title="Next">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </button>
+                                        <span id="attack-params-counter" style="margin-left: 12px; font-size: 12px; color: var(--text-muted);"></span>
+                                    </div>
+                                    <div id="attack-params-container" class="params-container"></div>
+                                </div>
+
+                                <div class="action-buttons">
+                                    <button class="btn btn-danger btn-large" onclick="launchAttack()">
+                                        <i class="fas fa-play"></i> Start
+                                    </button>
+                                    <button class="btn btn-warning btn-large" onclick="stopAttack()">
+                                        <i class="fas fa-stop"></i> Stop
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="content-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-terminal"></i> Command & Status</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="command-section">
+                                    <label class="form-label">Generated Command</label>
+                                    <div class="command-preview" id="attack-command-preview">
+                                        Select attack type to generate command...
+                                    </div>
+                                    <button class="btn btn-secondary btn-block" onclick="copyCommand('attack')">
+                                        <i class="fas fa-copy"></i> Copy
+                                    </button>
+                                </div>
+
+                                <div class="status-section">
+                                    <label class="form-label">Attack Status</label>
+                                    <div id="attack-status" class="status-box">
+                                        <div class="no-data">No attack running</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="content-card full-width">
+                        <div class="card-header">
+                            <h3><i class="fas fa-code"></i> Source Code</h3>
+                            <div class="source-code-navigation" id="attack-source-nav" style="display: none;">
+                                <button class="icon-btn" onclick="navigateSourceCode('attack', 'prev')" id="attack-source-prev" title="Previous">
+                                    <i class="fas fa-chevron-left"></i>
+                                </button>
+                                <span id="attack-source-title" style="margin: 0 12px; font-size: 14px; color: var(--text-secondary);"></span>
+                                <button class="icon-btn" onclick="navigateSourceCode('attack', 'next')" id="attack-source-next" title="Next">
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                                <span id="attack-source-counter" style="margin-left: 12px; font-size: 12px; color: var(--text-muted);"></span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div id="attack-source-container" class="source-code-container">
+                                <div class="no-data">Select attack type(s) to view source code</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="detection-tab" class="tab-content">
+                    <div class="content-grid">
+                        <div class="content-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-search"></i> Detection Configuration</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-section">
+                                    <label class="form-label">
+                                        <i class="fas fa-filter"></i> Detection Type (Multiple Selection)
+                                    </label>
+                                    <div class="checkbox-group">
+                                        <label class="checkbox-item">
+                                            <input type="checkbox" name="detection-type" value="threshold_based" onchange="updateDetectionParams()">
+                                            <span>Threshold-based Detection</span>
+                                        </label>
+                                        <label class="checkbox-item">
+                                            <input type="checkbox" name="detection-type" value="statistical_analysis" onchange="updateDetectionParams()">
+                                            <span>Statistical Analysis</span>
+                                        </label>
+                                        <label class="checkbox-item">
+                                            <input type="checkbox" name="detection-type" value="pattern_recognition" onchange="updateDetectionParams()">
+                                            <span>Pattern Recognition</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div id="detection-params-wrapper">
+                                    <div class="params-navigation" id="detection-params-nav" style="display: none;">
+                                        <button class="icon-btn" onclick="navigateParams('detection', 'prev')" id="detection-params-prev" title="Previous">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </button>
+                                        <span id="detection-params-title" style="margin: 0 12px; font-size: 14px; color: var(--text-secondary); font-weight: 500;"></span>
+                                        <button class="icon-btn" onclick="navigateParams('detection', 'next')" id="detection-params-next" title="Next">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </button>
+                                        <span id="detection-params-counter" style="margin-left: 12px; font-size: 12px; color: var(--text-muted);"></span>
+                                    </div>
+                                    <div id="detection-params-container" class="params-container"></div>
+                                </div>
+
+                                <div class="action-buttons">
+                                    <button class="btn btn-success btn-large" onclick="enableDetection()">
+                                        <i class="fas fa-play"></i> Start
+                                    </button>
+                                    <button class="btn btn-danger btn-large" onclick="disableDetection()">
+                                        <i class="fas fa-stop"></i> Stop
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="content-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-terminal"></i> Command & Status</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="command-section">
+                                    <label class="form-label">Generated Command</label>
+                                    <div class="command-preview" id="detection-command-preview">
+                                        Select detection type to generate command...
+                                    </div>
+                                    <button class="btn btn-secondary btn-block" onclick="copyCommand('detection')">
+                                        <i class="fas fa-copy"></i> Copy
+                                    </button>
+                                </div>
+
+                                <div class="status-section">
+                                    <label class="form-label">Detection Status</label>
+                                    <div id="detection-status" class="status-box">
+                                        <div class="no-data">No detection active</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="content-card full-width">
+                        <div class="card-header">
+                            <h3><i class="fas fa-code"></i> Source Code</h3>
+                            <div class="source-code-navigation" id="detection-source-nav" style="display: none;">
+                                <button class="icon-btn" onclick="navigateSourceCode('detection', 'prev')" id="detection-source-prev" title="Previous">
+                                    <i class="fas fa-chevron-left"></i>
+                                </button>
+                                <span id="detection-source-title" style="margin: 0 12px; font-size: 14px; color: var(--text-secondary);"></span>
+                                <button class="icon-btn" onclick="navigateSourceCode('detection', 'next')" id="detection-source-next" title="Next">
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                                <span id="detection-source-counter" style="margin-left: 12px; font-size: 12px; color: var(--text-muted);"></span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div id="detection-source-container" class="source-code-container">
+                                <div class="no-data">Select detection type(s) to view source code</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="defense-tab" class="tab-content">
+                    <div class="content-grid">
+                        <div class="content-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-shield-alt"></i> Defense Configuration</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-section">
+                                    <label class="form-label">
+                                        <i class="fas fa-shield"></i> Defense Type (Multiple Selection)
+                                    </label>
+                                    <div class="checkbox-group">
+                                        <label class="checkbox-item">
+                                            <input type="checkbox" name="defense-type" value="ip_filtering" onchange="updateDefenseParams()">
+                                            <span>IP Filtering</span>
+                                        </label>
+                                        <label class="checkbox-item">
+                                            <input type="checkbox" name="defense-type" value="rate_limiting" onchange="updateDefenseParams()">
+                                            <span>Rate Limiting</span>
+                                        </label>
+                                        <label class="checkbox-item">
+                                            <input type="checkbox" name="defense-type" value="dynamic_throttling" onchange="updateDefenseParams()">
+                                            <span>Dynamic Throttling</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div id="defense-params-wrapper">
+                                    <div class="params-navigation" id="defense-params-nav" style="display: none;">
+                                        <button class="icon-btn" onclick="navigateParams('defense', 'prev')" id="defense-params-prev" title="Previous">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </button>
+                                        <span id="defense-params-title" style="margin: 0 12px; font-size: 14px; color: var(--text-secondary); font-weight: 500;"></span>
+                                        <button class="icon-btn" onclick="navigateParams('defense', 'next')" id="defense-params-next" title="Next">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </button>
+                                        <span id="defense-params-counter" style="margin-left: 12px; font-size: 12px; color: var(--text-muted);"></span>
+                                    </div>
+                                    <div id="defense-params-container" class="params-container"></div>
+                                </div>
+
+                                <div class="action-buttons">
+                                    <button class="btn btn-success btn-large" onclick="enableDefense()">
+                                        <i class="fas fa-play"></i> Start
+                                    </button>
+                                    <button class="btn btn-danger btn-large" onclick="disableDefense()">
+                                        <i class="fas fa-stop"></i> Stop
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="content-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-terminal"></i> Command & Status</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="command-section">
+                                    <label class="form-label">Generated Command</label>
+                                    <div class="command-preview" id="defense-command-preview">
+                                        Select defense type to generate command...
+                                    </div>
+                                    <button class="btn btn-secondary btn-block" onclick="copyCommand('defense')">
+                                        <i class="fas fa-copy"></i> Copy
+                                    </button>
+                                </div>
+
+                                <div class="status-section">
+                                    <label class="form-label">Defense Status</label>
+                                    <div id="defense-status" class="status-box">
+                                        <div class="no-data">No defense active</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="content-card full-width">
+                        <div class="card-header">
+                            <h3><i class="fas fa-code"></i> Source Code</h3>
+                            <div class="source-code-navigation" id="defense-source-nav" style="display: none;">
+                                <button class="icon-btn" onclick="navigateSourceCode('defense', 'prev')" id="defense-source-prev" title="Previous">
+                                    <i class="fas fa-chevron-left"></i>
+                                </button>
+                                <span id="defense-source-title" style="margin: 0 12px; font-size: 14px; color: var(--text-secondary);"></span>
+                                <button class="icon-btn" onclick="navigateSourceCode('defense', 'next')" id="defense-source-next" title="Next">
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                                <span id="defense-source-counter" style="margin-left: 12px; font-size: 12px; color: var(--text-muted);"></span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div id="defense-source-container" class="source-code-container">
+                                <div class="no-data">Select defense type(s) to view source code</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="scenarios-tab" class="tab-content">
+                    <div class="content-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-film"></i> Attack Scenarios</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="scenarios-grid" id="scenarios-grid"></div>
+                        </div>
+                    </div>
+
+                    <div id="scenario-details" class="content-card" style="display: none;">
+                        <div class="card-header">
+                            <h3><i class="fas fa-info-circle"></i> Scenario Details</h3>
+                            <button class="icon-btn" onclick="clearScenario()" title="Close Details">
+                                <i class="fas fa-times"></i>
                             </button>
-                            <button class="btn btn-warning" onclick="systemAction('restart')">
-                                <i class="fas fa-redo"></i> Restart
-                            </button>
-                            <button class="btn btn-danger" onclick="systemAction('stop')">
-                                <i class="fas fa-stop"></i> Stop System
-                            </button>
-                            <button class="btn btn-primary" onclick="testConnectivity()">
-                                <i class="fas fa-network-wired"></i> Test Connectivity
-                            </button>
                         </div>
-                        
-                        <div id="connectivity-results" style="display: none; margin-top: 20px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="toggleConnectivityResults()">
-                                <h3><i class="fas fa-chart-bar"></i> Connectivity Test Results</h3>
-                                <i class="fas fa-chevron-down" id="connectivity-toggle-icon"></i>
-                            </div>
-                            <div id="connectivity-content" style="display: block;">
-                                <div id="connectivity-summary" class="status-box" style="margin-bottom: 10px;"></div>
-                                <div id="connectivity-details" class="table-container"></div>
+                        <div class="card-body">
+                            <div id="scenario-details-content"></div>
+                            <div class="action-buttons">
+                                <button class="btn btn-primary btn-large" onclick="loadScenario()">
+                                    <i class="fas fa-play"></i> Start
+                                </button>
                             </div>
                         </div>
                     </div>
 
-                    <div class="card">
-                        <h2><i class="fas fa-heartbeat"></i> Real-time Metrics</h2>
-                        <div class="metrics-grid">
-                            <div class="metric-box">
-                                <div class="metric-value" id="cpu-value">0%</div>
-                                <div class="metric-label">CPU Usage</div>
-                            </div>
-                            <div class="metric-box">
-                                <div class="metric-value" id="memory-value">0%</div>
-                                <div class="metric-label">Memory Usage</div>
-                            </div>
-                            <div class="metric-box">
-                                <div class="metric-value" id="network-value">0</div>
-                                <div class="metric-label">Connections</div>
-                            </div>
-                            <div class="metric-box">
-                                <div class="metric-value" id="latency-value">0ms</div>
-                                <div class="metric-label">Latency</div>
+                    <div class="content-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-mobile-alt"></i> UE Status</h3>
+                        </div>
+                        <div class="card-body">
+                            <div id="ue-status-grid" class="ue-status-grid">
+                                <div class="no-data">Load a scenario to view UE status</div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="card">
-                    <h2><i class="fas fa-chart-area"></i> Performance Monitoring</h2>
-                    <div style="position: relative; height: 300px;">
-                        <canvas id="performance-chart"></canvas>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <h2><i class="fas fa-exclamation-triangle"></i> Recent Alerts</h2>
-                    <div id="alerts-container" class="alerts-container">
-                        <p class="no-data">No alerts</p>
-                    </div>
-                </div>
-            </div>
-
-            <div id="topology-tab" class="tab-content">
-                <div class="card">
-                    <h2><i class="fas fa-project-diagram"></i> Network Topology</h2>
-                    <div class="topology-container">
-                        <svg id="topology-svg" width="100%" height="600">
-                            <g id="topology-elements"></g>
-                        </svg>
-                    </div>
-                    <div class="button-group">
-                        <button class="btn btn-primary" onclick="setupNamespaces()">
-                            <i class="fas fa-network-wired"></i> Setup Namespaces
-                        </button>
-                        <button class="btn btn-warning" onclick="cleanupNamespaces()">
-                            <i class="fas fa-broom"></i> Cleanup Namespaces
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div id="attack-tab" class="tab-content">
-                <div class="grid-2">
-                    <div class="card">
-                        <h2><i class="fas fa-crosshairs"></i> Attack Configuration</h2>
-                        <div class="form-group">
-                            <label for="attack-type">Attack Type:</label>
-                            <select id="attack-type" class="form-control" onchange="updateAttackParams()">
-                                <option value="">-- Select Attack --</option>
-                                <optgroup label="F1-C (Control Plane)">
-                                    <option value="massive_ue_connection">Massive UE Connection Flooding</option>
-                                    <option value="ue_context_flooding">UE Context Flooding</option>
-                                    <option value="handover_flooding">Handover Flooding</option>
-                                    <option value="bearer_flooding">Bearer Flooding</option>
-                                </optgroup>
-                                <optgroup label="F1-U (Data Plane)">
-                                    <option value="udp_flood">UDP Flood</option>
-                                    <option value="gtp_flood">GTP-U Flood</option>
-                                </optgroup>
-                                <optgroup label="Advanced">
-                                    <option value="distributed_ddos">Distributed DDoS</option>
-                                    <option value="slowloris">Slowloris</option>
-                                </optgroup>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="attack-target">Target:</label>
-                            <select id="attack-target" class="form-control">
-                                <option value="cu_cp">CU-CP (192.168.71.130)</option>
-                                <option value="cu_up">CU-UP (192.168.71.131)</option>
-                                <option value="du">DU (192.168.71.132)</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="attack-mode">Mode:</label>
-                            <select id="attack-mode" class="form-control">
-                                <option value="manual">Manual (Custom Parameters)</option>
-                                <option value="auto">Auto (Preset Parameters)</option>
-                            </select>
-                        </div>
-
-                        <div id="attack-params-container"></div>
-
-                        <div class="button-group">
-                            <button class="btn btn-danger" onclick="launchAttack()">
-                                <i class="fas fa-rocket"></i> Launch Attack
-                            </button>
-                            <button class="btn btn-warning" onclick="stopAttack()">
-                                <i class="fas fa-hand-paper"></i> Stop Attack
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <h2><i class="fas fa-terminal"></i> Attack Command</h2>
-                        <div class="command-preview" id="attack-command-preview">
-                            Select attack type to generate command...
-                        </div>
-                        <button class="btn btn-secondary" onclick="copyCommand('attack')">
-                            <i class="fas fa-copy"></i> Copy Command
-                        </button>
-
-                        <h3 style="margin-top: 20px;"><i class="fas fa-history"></i> Attack Status</h3>
-                        <div id="attack-status" class="status-box">
-                            <p class="no-data">No attack running</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="defense-tab" class="tab-content">
-                <div class="grid-2">
-                    <div class="card">
-                        <h2><i class="fas fa-shield-alt"></i> Defense Configuration</h2>
-                        <div class="form-group">
-                            <label for="defense-category">Defense Category:</label>
-                            <select id="defense-category" class="form-control" onchange="updateDefenseCategory()">
-                                <option value="">-- Select Category --</option>
-                                <option value="detection">Detection</option>
-                                <option value="mitigation">Mitigation</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="defense-type">Defense Type:</label>
-                            <select id="defense-type" class="form-control" onchange="updateDefenseParams()" disabled>
-                                <option value="">-- Select Category First --</option>
-                            </select>
-                        </div>
-
-                        <div id="defense-params-container"></div>
-
-                        <div class="button-group">
-                            <button class="btn btn-success" onclick="enableDefense()">
-                                <i class="fas fa-check"></i> Enable Defense
-                            </button>
-                            <button class="btn btn-danger" onclick="disableDefense()">
-                                <i class="fas fa-times"></i> Disable Defense
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <h2><i class="fas fa-terminal"></i> Defense Command</h2>
-                        <div class="command-preview" id="defense-command-preview">
-                            Select defense type to generate command...
-                        </div>
-                        <button class="btn btn-secondary" onclick="copyCommand('defense')">
-                            <i class="fas fa-copy"></i> Copy Command
-                        </button>
-
-                        <h3 style="margin-top: 20px;"><i class="fas fa-history"></i> Defense Status</h3>
-                        <div id="defense-status" class="status-box">
-                            <p class="no-data">No defense active</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="scenarios-tab" class="tab-content">
-                <div class="card">
-                    <h2><i class="fas fa-film"></i> Attack Scenarios</h2>
-                    <div class="scenarios-grid" id="scenarios-grid">
-                    </div>
-                </div>
-
-                <div id="scenario-details" class="card" style="display: none;">
-                    <h2><i class="fas fa-info-circle"></i> Scenario Details</h2>
-                    <div id="scenario-details-content"></div>
-                    <div class="button-group">
-                        <button class="btn btn-primary" onclick="loadScenario()">
-                            <i class="fas fa-play"></i> Load Scenario
-                        </button>
-                        <button class="btn btn-secondary" onclick="clearScenario()">
-                            <i class="fas fa-times"></i> Clear
-                        </button>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <h2><i class="fas fa-mobile-alt"></i> UE Status</h2>
-                    <div id="ue-status-grid" class="ue-status-grid">
-                        <p class="no-data">Load a scenario to view UE status</p>
-                    </div>
-                </div>
-            </div>
-
-            <div id="performance-tab" class="tab-content">
-                <div class="card">
-                    <h2><i class="fas fa-chart-line"></i> Performance Analysis</h2>
-                    <div class="button-group">
-                        <button class="btn btn-success" onclick="startMonitoring()">
-                            <i class="fas fa-play"></i> Start Monitoring
-                        </button>
-                        <button class="btn btn-danger" onclick="stopMonitoring()">
-                            <i class="fas fa-stop"></i> Stop Monitoring
-                        </button>
-                        <button class="btn btn-primary" onclick="exportPerformance('csv')">
-                            <i class="fas fa-file-csv"></i> Export CSV
-                        </button>
-                        <button class="btn btn-primary" onclick="exportPerformance('json')">
-                            <i class="fas fa-file-code"></i> Export JSON
-                        </button>
-                    </div>
-                </div>
-
-                <div class="grid-2">
-                    <div class="card">
-                        <h3><i class="fas fa-microchip"></i> CPU & Memory</h3>
-                        <div style="position: relative; height: 250px;">
-                            <canvas id="cpu-memory-chart"></canvas>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <h3><i class="fas fa-network-wired"></i> Network Traffic</h3>
-                        <div style="position: relative; height: 250px;">
-                            <canvas id="network-chart"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <h3><i class="fas fa-table"></i> Performance Metrics Table</h3>
-                    <div class="table-container">
-                        <table id="metrics-table" class="metrics-table">
-                            <thead>
-                                <tr>
-                                    <th>Timestamp</th>
-                                    <th>CPU %</th>
-                                    <th>Memory %</th>
-                                    <th>Connections</th>
-                                    <th>Packet Rate</th>
-                                    <th>F1-C</th>
-                                    <th>F1-U</th>
-                                </tr>
-                            </thead>
-                            <tbody id="metrics-table-body">
-                                <tr><td colspan="7" class="no-data">No data available</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
             </div>
         </main>
     </div>
@@ -362,5 +669,3 @@
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>
-
-

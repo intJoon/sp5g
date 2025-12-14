@@ -27,12 +27,6 @@ dashboard.log
 .DS_Store
 Thumbs.db
 
-# Project specific
-data/
-results/
-*.tmp
-*.bak
-
 # Build artifacts
 build/
 dist/

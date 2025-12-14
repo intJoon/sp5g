@@ -130,6 +130,8 @@ install_part2() {
 }
 
 start_dashboard() {
+    set +e
+    
     print_status "Starting SP5G Management Dashboard..."
     
     if [ ! -d "$DASHBOARD_DIR" ]; then
@@ -171,19 +173,49 @@ start_dashboard() {
     
     echo "" > "$LOG_FILE"
     
-    python dashboard.py &
+    python dashboard.py > "$LOG_FILE" 2>&1 &
     DASHBOARD_PID=$!
     
     print_status "Dashboard started (PID: $DASHBOARD_PID)"
     print_status "Monitoring command output... (Press Ctrl+C to stop)"
     echo ""
     
-    tail -f "$LOG_FILE" &
+    cleanup() {
+        echo ""
+        print_status "Stopping dashboard..."
+        
+        stty sane 2>/dev/null
+        
+        if [ ! -z "$DASHBOARD_PID" ]; then
+            kill -TERM "$DASHBOARD_PID" 2>/dev/null
+            sleep 1
+            if kill -0 "$DASHBOARD_PID" 2>/dev/null; then
+                kill -KILL "$DASHBOARD_PID" 2>/dev/null
+            fi
+        fi
+        
+        if [ ! -z "$TAIL_PID" ]; then
+            kill -TERM "$TAIL_PID" 2>/dev/null
+            sleep 1
+            if kill -0 "$TAIL_PID" 2>/dev/null; then
+                kill -KILL "$TAIL_PID" 2>/dev/null
+            fi
+        fi
+        
+        stty sane 2>/dev/null
+        print_status "Dashboard stopped."
+        exit 0
+    }
+    
+    trap cleanup INT TERM
+    
+    tail -f "$LOG_FILE" 2>/dev/null &
     TAIL_PID=$!
     
-    trap "kill $DASHBOARD_PID $TAIL_PID 2>/dev/null; exit 0" INT TERM
+    wait $DASHBOARD_PID 2>/dev/null
+    EXIT_CODE=$?
     
-    wait $DASHBOARD_PID
+    cleanup
 }
 
 main() {

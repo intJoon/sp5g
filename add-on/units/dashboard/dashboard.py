@@ -1,6 +1,7 @@
 import os
 import sys
 import logging
+import signal
 from datetime import datetime
 from flask import Flask, render_template, request, jsonify
 from flask_socketio import SocketIO, emit
@@ -23,8 +24,29 @@ app = Flask(__name__,
             static_url_path='/static',
             template_folder=os.path.join(DASHBOARD_DIR, 'templates'))
 app.config.from_object(Config)
+
+DEBUG_MODE = os.environ.get('FLASK_DEBUG', 'True').lower() == 'true'
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+app.config['TEMPLATES_AUTO_RELOAD'] = True
+
 CORS(app)
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
+socketio = SocketIO(
+    app, 
+    cors_allowed_origins="*", 
+    async_mode='threading',
+    logger=True,
+    engineio_logger=True,
+    ping_timeout=60,
+    ping_interval=25
+)
+
+@app.after_request
+def after_request(response):
+    if DEBUG_MODE:
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+    return response
 
 os.makedirs(Config.LOG_DIR, exist_ok=True)
 os.makedirs(Config.DATA_DIR, exist_ok=True)
@@ -226,10 +248,65 @@ def test_connectivity():
         logger.error(f"Error testing connectivity: {e}")
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/source/<category>/<source_type>')
+def get_source_code(category, source_type):
+    try:
+        ADD_ON_ROOT = Config.ADD_ON_ROOT
+        source_paths = {
+            'attack': {
+                'massive_ue_connection': 'units/actioner/attacker/f1c/f1c_attack.py',
+                'ue_context_flooding': 'units/actioner/attacker/f1c/f1c_attack.py',
+                'handover_flooding': 'units/actioner/attacker/f1c/f1c_attack.py',
+                'bearer_flooding': 'units/actioner/attacker/f1c/f1c_attack.py',
+                'udp_flood': 'units/actioner/attacker/f1u/f1u_attack.py',
+                'gtp_flood': 'units/actioner/attacker/f1u/f1u_attack.py',
+                'distributed_ddos': 'units/actioner/attacker/botnet/botnet_controller.py',
+                'slowloris': 'units/actioner/attacker/f1c/f1c_attack.py'
+            },
+            'detection': {
+                'threshold_based': 'units/actioner/detector/detector.py',
+                'statistical_analysis': 'units/actioner/detector/detector.py',
+                'pattern_recognition': 'units/actioner/detector/ml_detector.py'
+            },
+            'defense': {
+                'ip_filtering': 'units/actioner/defender/filter.py',
+                'rate_limiting': 'units/actioner/defender/rate_limiter.py',
+                'dynamic_throttling': 'units/actioner/defender/rate_limiter.py'
+            }
+        }
+        
+        if category not in source_paths or source_type not in source_paths[category]:
+            return jsonify({'error': f'Invalid source type: {category}/{source_type}'}), 404
+        
+        file_path = os.path.join(ADD_ON_ROOT, source_paths[category][source_type])
+        
+        if not os.path.exists(file_path):
+            logger.error(f"Source file not found: {file_path}")
+            return jsonify({'error': f'Source file not found: {file_path}'}), 404
+        
+        with open(file_path, 'r', encoding='utf-8') as f:
+            source_code = f.read()
+        
+        file_name = os.path.basename(file_path)
+        relative_path = source_paths[category][source_type]
+        
+        return jsonify({
+            'source_code': source_code,
+            'file_name': file_name,
+            'file_path': relative_path,
+            'type': source_type
+        })
+    except Exception as e:
+        logger.error(f"Error reading source code: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
 @socketio.on('connect')
 def handle_connect():
-    logger.info('Client connected')
-    emit('connected', {'status': 'ok'})
+    client_ip = request.remote_addr
+    logger.info('Client connected from {} - session ID: {}'.format(client_ip, request.sid))
+    emit('connected', {'status': 'ok', 'session_id': request.sid, 'message': 'Welcome to SP5G Dashboard'})
 
 @socketio.on('disconnect')
 def handle_disconnect():
@@ -277,16 +354,41 @@ def monitoring_loop():
     
     logger.info("Monitoring loop stopped")
 
+def signal_handler(sig, frame):
+    logger.info(f"Received signal {sig}, shutting down gracefully...")
+    global monitoring_active
+    monitoring_active = False
+    
+    if monitoring_thread and monitoring_thread.is_alive():
+        logger.info("Waiting for monitoring thread to stop...")
+        monitoring_thread.join(timeout=2)
+    
+    logger.info("Dashboard shutdown complete")
+    sys.exit(0)
+
 if __name__ == '__main__':
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
+    
     os.makedirs(Config.LOG_DIR, exist_ok=True)
     os.makedirs(Config.DATA_DIR, exist_ok=True)
     os.makedirs(Config.RESULTS_DIR, exist_ok=True)
     
     logger.info("Starting SP5G Dashboard...")
     logger.info(f"Dashboard available at http://localhost:5000")
+    logger.info(f"Debug mode: {DEBUG_MODE} (set FLASK_DEBUG=False to disable)")
     
     start_background_monitoring()
     
-    socketio.run(app, host='0.0.0.0', port=5000, debug=False, allow_unsafe_werkzeug=True)
+    try:
+        socketio.run(app, host='0.0.0.0', port=5000, debug=DEBUG_MODE, allow_unsafe_werkzeug=True, use_reloader=DEBUG_MODE)
+    except KeyboardInterrupt:
+        logger.info("Keyboard interrupt received")
+        signal_handler(signal.SIGINT, None)
+    except Exception as e:
+        logger.error(f"Unexpected error: {e}")
+        import traceback
+        traceback.print_exc()
+        signal_handler(signal.SIGTERM, None)
 
 
