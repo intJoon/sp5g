@@ -2,6 +2,7 @@ services:
     mysql:
         container_name: "rfsim5g-mysql"
         image: mysql:8.0
+        init: true
         volumes:
             - ../5g_rfsimulator/oai_db.sql:/docker-entrypoint-initdb.d/oai_db.sql
             - ../5g_rfsimulator/mysql-healthcheck.sh:/tmp/mysql-healthcheck.sh
@@ -13,10 +14,10 @@ services:
             - MYSQL_ROOT_PASSWORD=linux
         healthcheck:
             test: /bin/bash -c "/tmp/mysql-healthcheck.sh"
-            start_period: 10s
-            start_interval: 500ms
             interval: 10s
             timeout: 5s
+            start_period: 10s
+            start_interval: 500ms
             retries: 30
         networks:
             public_net:
@@ -48,6 +49,7 @@ services:
     oai-upf:
         container_name: "rfsim5g-oai-upf"
         image: oaisoftwarealliance/oai-upf:v2.1.10
+        init: true
         environment:
             - TZ=Europe/Paris
         volumes:
@@ -70,7 +72,8 @@ services:
     oai-ext-dn:
         privileged: true
         container_name: rfsim5g-oai-ext-dn
-        image: oaisoftwarealliance/trf-gen-cn5g:focal
+        image: oaisoftwarealliance/trf-gen-cn5g:latest
+        init: true
         entrypoint: /bin/bash -c \
               "iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE;"\
               "ip route add 12.1.1.0/24 via 192.168.72.134 dev eth0; sleep infinity"
@@ -81,34 +84,34 @@ services:
                 ipv4_address: 192.168.72.135
         healthcheck:
             test: /bin/bash -c "ping -c 2 192.168.72.134"
-            start_period: 10s
-            start_interval: 500ms
             interval: 10s
             timeout: 5s
             retries: 5
+            start_period: 10s
+            start_interval: 500ms
     oai-gnb:
         image: ${REGISTRY-oaisoftwarealliance/}${GNB_IMG:-oai-gnb}:${TAG:-develop}
         container_name: rfsim5g-oai-gnb
         cap_drop:
             - ALL
         environment:
-            USE_ADDITIONAL_OPTIONS: --rfsim --log_config.global_log_options level,nocolor,time
-            ASAN_OPTIONS: detect_leaks=0
+            USE_ADDITIONAL_OPTIONS: -E --log_config.global_log_options level,nocolor,time --device.name vrtsim --vrtsim.role server --vrtsim.chanmod 1
         depends_on:
             - oai-ext-dn
         networks:
             public_net:
                 ipv4_address: 192.168.71.140
         volumes:
-            - ../../conf_files/gnb.sa.band254.u0.25prb.rfsim.ntn-leo.conf:/opt/oai-gnb/etc/gnb.conf
+            - ../../conf_files/gnb.sa.band78.106prb.vrtsim.2x2.yaml:/opt/oai-gnb/etc/gnb.yaml
+            - tmp_data:/tmp/
         healthcheck:
             test: /bin/bash -c "pgrep nr-softmodem"
-            start_period: 10s
-            start_interval: 500ms
             interval: 10s
             timeout: 5s
+            start_period: 10s
+            start_interval: 500ms
             retries: 5
-
+        ipc: host
     oai-nr-ue:
         image: ${REGISTRY-oaisoftwarealliance/}${NRUE_IMG:-oai-nr-ue}:${TAG:-develop}
         container_name: rfsim5g-oai-nr-ue
@@ -118,14 +121,7 @@ services:
             - NET_ADMIN  # for interface bringup
             - NET_RAW    # for ping
         environment:
-            USE_ADDITIONAL_OPTIONS:
-                --band 254 -C 2488400000 --CO -873500000 -r 25 --numerology 0 --ssb 60
-                --rfsim --rfsimulator.prop_delay 20 --rfsimulator.options chanmod
-                --rfsimulator.serveraddr 192.168.71.140
-                --time-sync-I 0.1 --ntn-initial-time-drift -46
-                --initial-fo 57340 --cont-fo-comp 2
-                --log_config.global_log_options level,nocolor,time
-                --num-ul-actors 1
+            USE_ADDITIONAL_OPTIONS: -E -r 106 --numerology 1 --band 78 -C 3619200000 --ssb 516 --uicc0.imsi 208990100001100 --log_config.global_log_options level,nocolor,time --device.name vrtsim
         depends_on:
             - oai-gnb
         networks:
@@ -134,14 +130,16 @@ services:
         devices:
              - /dev/net/tun:/dev/net/tun
         volumes:
-            - ../../conf_files/nrue.uicc.ntn-leo.conf:/opt/oai-nr-ue/etc/nr-ue.conf
+            - ../../conf_files/nrue.vrtsim.chanmod.yaml:/opt/oai-nr-ue/etc/nr-ue.yaml
+            - tmp_data:/tmp/
         healthcheck:
             test: /bin/bash -c "pgrep nr-uesoftmodem"
-            start_period: 10s
-            start_interval: 500ms
             interval: 10s
             timeout: 5s
             retries: 5
+            start_period: 10s
+            start_interval: 500ms
+        ipc: host
 
 networks:
     public_net:
@@ -160,3 +158,6 @@ networks:
                 - subnet: 192.168.72.128/26
         driver_opts:
             com.docker.network.bridge.name: "rfsim5g-traffic"
+
+volumes:
+    tmp_data:

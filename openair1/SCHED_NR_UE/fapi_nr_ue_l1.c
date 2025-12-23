@@ -39,7 +39,8 @@
 #include "PHY/impl_defs_nr.h"
 #include "utils.h"
 #include "SCHED_NR_UE/phy_sch_processing_time.h"
-#include "openair1/PHY/phy_extern_nr_ue.h"
+
+extern PHY_VARS_NR_UE ***PHY_vars_UE_g;
 
 const char *const dl_pdu_type[] = {"DCI", "DLSCH", "RA_DLSCH", "SI_DLSCH", "P_DLSCH", "CSI_RS", "CSI_IM", "TA"};
 const char *const ul_pdu_type[] = {"PRACH", "PUCCH", "PUSCH", "SRS"};
@@ -95,12 +96,20 @@ static void configure_ntn_params(PHY_VARS_NR_UE *ue, fapi_nr_dl_ntn_config_comma
     ue->ntn_config_message = CALLOC(1, sizeof(*ue->ntn_config_message));
   }
 
+  ue->ntn_config_message->ntn_config_params.epoch_hfn = ntn_params_message->epoch_hfn;
   ue->ntn_config_message->ntn_config_params.epoch_sfn = ntn_params_message->epoch_sfn;
   ue->ntn_config_message->ntn_config_params.epoch_subframe = ntn_params_message->epoch_subframe;
+
+  ue->ntn_config_message->ntn_config_params.omega = ntn_params_message->omega;
+  ue->ntn_config_message->ntn_config_params.pos_sat_0 = ntn_params_message->pos_sat_0;
+  ue->ntn_config_message->ntn_config_params.pos_sat_90 = ntn_params_message->pos_sat_90;
+
+  ue->ntn_config_message->ntn_config_params.N_common_ta_adj = ntn_params_message->N_common_ta_adj;
+  ue->ntn_config_message->ntn_config_params.N_common_ta_drift = ntn_params_message->N_common_ta_drift;
+  ue->ntn_config_message->ntn_config_params.N_common_ta_drift_variant = ntn_params_message->N_common_ta_drift_variant;
+
   ue->ntn_config_message->ntn_config_params.cell_specific_k_offset = ntn_params_message->cell_specific_k_offset;
-  ue->ntn_config_message->ntn_config_params.ntn_total_time_advance_ms = ntn_params_message->ntn_total_time_advance_ms;
-  ue->ntn_config_message->ntn_config_params.ntn_total_time_advance_drift = ntn_params_message->ntn_total_time_advance_drift;
-  ue->ntn_config_message->ntn_config_params.ntn_total_time_advance_drift_variant = ntn_params_message->ntn_total_time_advance_drift_variant;
+
   ue->ntn_config_message->update = true;
 }
 
